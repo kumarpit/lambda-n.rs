@@ -7,8 +7,32 @@ use syn::{
     token::Comma,
 };
 
+/// Creates a closure with a specified number of arguments.
+///
+/// The macro takes an integer `N` and a body expression, generating a closure
+/// that accepts `N` arguments. The arguments are automatically named `__1`, `__2`, ..., `__N`
+/// and are available for use within the body.
+///
+/// # Syntax
+///
+/// `lambda_n!([move] <integer> => <expression>)`
+///
+/// # Example
+///
+/// ```ignore
+/// // Creates a closure that takes 3 arguments and adds them.
+/// let add_three = lambda_n!(3 => __1 + __2 + __3);
+/// assert_eq!(add_three(10, 20, 5), 35);
+/// ```
+#[proc_macro]
+pub fn lambda_n(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let c = syn::parse_macro_input!(input as LambdaN);
+    quote!(#c).into()
+}
+
 /// Intermediate representation of the `lambda_n!` macro input.
 struct LambdaN {
+    /// Whether or not the closure should take ownership of its env
     should_move: bool,
     /// The number of arguments for the generated closure.
     n_args: u16,
@@ -60,27 +84,4 @@ impl ToTokens for LambdaN {
             tokens.extend(quote!({ |#args|  #body }));
         }
     }
-}
-
-/// Creates a closure with a specified number of arguments.
-///
-/// The macro takes an integer `N` and a body expression, generating a closure
-/// that accepts `N` arguments. The arguments are automatically named `__1`, `__2`, ..., `__N`
-/// and are available for use within the body.
-///
-/// # Syntax
-///
-/// `lambda_n!([move] <integer> => <expression>)`
-///
-/// # Example
-///
-/// ```ignore
-/// // Creates a closure that takes 3 arguments and adds them.
-/// let add_three = lambda_n!(3 => __1 + __2 + __3);
-/// assert_eq!(add_three(10, 20, 5), 35);
-/// ```
-#[proc_macro]
-pub fn lambda_n(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let c = syn::parse_macro_input!(input as LambdaN);
-    quote!(#c).into()
 }
