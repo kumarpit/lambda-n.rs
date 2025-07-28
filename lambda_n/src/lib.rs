@@ -63,10 +63,16 @@ fn extract_integer(expr: Expr) -> syn::Result<u16> {
     if let Expr::Lit(ExprLit { lit, .. }) = &expr {
         match lit {
             syn::Lit::Int(lit_int) => lit_int.base10_parse(),
-            _ => Err(syn::Error::new(expr.span(), "Expected a integer literal")),
+            _ => Err(syn::Error::new(
+                expr.span(),
+                "Expected a (positive) integer literal",
+            )),
         }
     } else {
-        Err(syn::Error::new(expr.span(), "Expected a integer literal"))
+        Err(syn::Error::new(
+            expr.span(),
+            "Expected a (positive) integer literal",
+        ))
     }
 }
 
